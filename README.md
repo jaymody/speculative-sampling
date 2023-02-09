@@ -1,5 +1,5 @@
 # Speculative Sampling
-Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py).
+Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://jaykmody.com/blog/speculative-sampling) for this implementation.
 
 GPT-2 code adapted from [picoGPT](https://github.com/jaymody/picoGPT). For the decoding algorithm themselves, I try and match the notation used in the paper as much as possible.
 
