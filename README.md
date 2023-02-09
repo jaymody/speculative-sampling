@@ -14,14 +14,14 @@ If you're using an M1 Macbook, you'll need to replace tensorflow with `tensorflo
 Tested on `Python 3.9.10`.
 
 **Usage**:
-```python
+```bash
 python main.py \
     --prompt "Alan Turing theorized that computers would one day become" \
     --n_tokens_to_generate 40
 ```
 
 This will take a while (about 5-10 minutes on an M1 MacBook). It outputs:
-```
+```text
 Autoregressive Decode
 --------------
 Time = 164.96s
