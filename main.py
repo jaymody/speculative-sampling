@@ -140,7 +140,7 @@ def main(
     # print results
     print()
     print("Autoregressive Decode")
-    print("--------------")
+    print("---------------------")
     print(f"Time = {autoregressive_time:.2f}s")
     print(f"Text = {autoregressive_text}")
     print()
