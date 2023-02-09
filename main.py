@@ -38,37 +38,36 @@ def speculative_sampling(x, draft_model, target_model, N, K):
 
     while n < T:
         # Step 1: auto-regressive decode K tokens from draft model
+        x_draft = x
         for _ in range(K):
-            x = np.append(x, sample(draft_model(x)[-1]))
+            x_draft = np.append(x_draft, sample(draft_model(x_draft)[-1]))
 
         # Step 2: draft and target model forward passes
-        p = draft_model(x)
-        q = target_model(x)
+        p = draft_model(x_draft)
+        q = target_model(x_draft)
 
-        # Step 3: figure out how many of the draft predictions we want to keep based on
-        # the rejection criteria, which is stored in the variable t
-        for t in range(1, K + 1):
+        # Step 3: append draft tokens based on rejection criterion and resample on rejection
+        keep_n = 0
+        for _ in range(K):
             r = np.random.random()
-            i = n + t - 2
-            j = np.argmax(p[i + 1])
-            if not r < min(1, q[i][j] / p[i][j]):
+            i = n - 1
+            j = x_draft[i + 1]
+            if r < min(1, q[i][j] / p[i][j]):  # accepted
+                x = np.append(x, j)
+                n += 1
+                keep_n += 1
+            else:  # rejected
+                x = np.append(x, sample(max_fn(q[i] - p[i])))  # resample
+                n += 1
                 break
 
-        # Step 4: sample final token
-        if t == K:
-            next_id = sample(q[-1])
-            x = np.append(x, next_id)
+        # Step 4: if all draft tokens were accepted, sample a final token
+        if keep_n == K:
+            x = np.append(x, sample(q[-1]))
             n += 1
-        else:
-            x = x[: -K + t]  # only keep accepted draft tokens
-            if t == 0:
-                next_id = sample(max_fn(q[n - 1] - p[n - 1]))  # resample
-                x = np.append(x, next_id)
-                n += 1
 
-        # update n by the total number of tokens we decoded
-        n += t
-        assert n == len(x)  # just keeping my sanity
+        # just keeping my sanity
+        assert n == len(x), f"{n} {len(x)}"
 
     return x
 
@@ -85,7 +84,7 @@ def create_model_fn(params, hparams):
 
 def main(
     prompt: str = "Alan Turing theorized that computers would one day become",
-    n_tokens_to_generate: int = 20,
+    n_tokens_to_generate: int = 40,
     draft_model_size: str = "124M",
     target_model_size: str = "1558M",
     models_dir: str = "models",
@@ -115,18 +114,18 @@ def main(
         elapsed_time = time.perf_counter() - start
         return text, elapsed_time
 
-    # autoregressive
-    autoregressive_text, autoregressive_time = run_sampling_fn(
-        autoregressive_sampling,
-        input_ids,
-        model=target_model,
-        N=n_tokens_to_generate,
-    )
-    print("Autoregressive Decode")
-    print("--------------")
-    print(f"Time = {autoregressive_time:.2f}s")
-    print(f"Text = {autoregressive_text}")
-    print()
+    # # autoregressive
+    # autoregressive_text, autoregressive_time = run_sampling_fn(
+    #     autoregressive_sampling,
+    #     input_ids,
+    #     model=target_model,
+    #     N=n_tokens_to_generate,
+    # )
+    # print("Autoregressive Decode")
+    # print("--------------")
+    # print(f"Time = {autoregressive_time:.2f}s")
+    # print(f"Text = {autoregressive_text}")
+    # print()
 
     # speculative
     speculative_text, speculative_time = run_sampling_fn(
