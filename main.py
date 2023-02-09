@@ -2,6 +2,7 @@ import functools
 import time
 
 import numpy as np
+from tqdm import tqdm
 
 from model import gpt2, softmax
 from utils import load_encoder_hparams_and_params
@@ -13,7 +14,8 @@ def max_fn(x):
 
 
 def sample(probs):
-    # greedy decode, you could also sample from the distribution directly of course
+    # NOTE: using greedy sampling here for simplicity since I don't implement top-p and
+    # without top-p sampling from the distribution gives bad results
     return np.argmax(probs)
 
 
@@ -21,11 +23,11 @@ def autoregressive_sampling(x, model, N):
     n = len(x)
     T = len(x) + N
 
-    while n < T:
-        q = model(x)
-        next_id = sample(q[-1])
-        x = np.append(x, next_id)
-        n += 1
+    with tqdm(total=N, desc="autoregressive sampling") as pbar:
+        while n < T:
+            x = np.append(x, sample(model(x)[-1]))
+            n += 1
+            pbar.update(1)
 
     return x
 
@@ -36,38 +38,41 @@ def speculative_sampling(x, draft_model, target_model, N, K):
     n = len(x)
     T = len(x) + N
 
-    while n < T:
-        # Step 1: auto-regressive decode K tokens from draft model
-        x_draft = x
-        for _ in range(K):
-            x_draft = np.append(x_draft, sample(draft_model(x_draft)[-1]))
+    with tqdm(total=N, desc="speculative sampling") as pbar:
+        while n < T:
+            # Step 1: auto-regressive decode K tokens from draft model
+            x_draft = x
+            for _ in range(K):
+                x_draft = np.append(x_draft, sample(draft_model(x_draft)[-1]))
 
-        # Step 2: draft and target model forward passes
-        p = draft_model(x_draft)
-        q = target_model(x_draft)
+            # Step 2: full draft and target model forward passes on x_draft
+            p = draft_model(x_draft)
+            q = target_model(x_draft)
 
-        # Step 3: append draft tokens based on rejection criterion and resample on rejection
-        keep_n = 0
-        for _ in range(K):
-            r = np.random.random()
-            i = n - 1
-            j = x_draft[i + 1]
-            if r < min(1, q[i][j] / p[i][j]):  # accepted
-                x = np.append(x, j)
+            # Step 3: append draft tokens based on rejection criterion and resample
+            # a token on rejection
+            keep_n = 0
+            for _ in range(K):
+                r = np.random.random()
+                i = n - 1
+                j = x_draft[i + 1]
+                if r < min(1, q[i][j] / p[i][j]):  # accepted
+                    x = np.append(x, j)
+                    n += 1
+                    keep_n += 1
+                else:  # rejected
+                    x = np.append(x, sample(max_fn(q[i] - p[i])))  # resample
+                    n += 1
+                    break
+
+            # Step 4: if all draft tokens were accepted, sample a final token
+            if keep_n == K:
+                x = np.append(x, sample(q[-1]))
                 n += 1
-                keep_n += 1
-            else:  # rejected
-                x = np.append(x, sample(max_fn(q[i] - p[i])))  # resample
-                n += 1
-                break
 
-        # Step 4: if all draft tokens were accepted, sample a final token
-        if keep_n == K:
-            x = np.append(x, sample(q[-1]))
-            n += 1
-
-        # just keeping my sanity
-        assert n == len(x), f"{n} {len(x)}"
+            # just keeping my sanity
+            pbar.update(n - pbar.n)
+            assert n == len(x), f"{n} {len(x)}"
 
     return x
 
@@ -114,18 +119,13 @@ def main(
         elapsed_time = time.perf_counter() - start
         return text, elapsed_time
 
-    # # autoregressive
-    # autoregressive_text, autoregressive_time = run_sampling_fn(
-    #     autoregressive_sampling,
-    #     input_ids,
-    #     model=target_model,
-    #     N=n_tokens_to_generate,
-    # )
-    # print("Autoregressive Decode")
-    # print("--------------")
-    # print(f"Time = {autoregressive_time:.2f}s")
-    # print(f"Text = {autoregressive_text}")
-    # print()
+    # autoregressive
+    autoregressive_text, autoregressive_time = run_sampling_fn(
+        autoregressive_sampling,
+        input_ids,
+        model=target_model,
+        N=n_tokens_to_generate,
+    )
 
     # speculative
     speculative_text, speculative_time = run_sampling_fn(
@@ -136,6 +136,14 @@ def main(
         N=n_tokens_to_generate,
         K=K,
     )
+
+    # print results
+    print()
+    print("Autoregressive Decode")
+    print("--------------")
+    print(f"Time = {autoregressive_time:.2f}s")
+    print(f"Text = {autoregressive_text}")
+    print()
     print("Speculative Decode")
     print("------------------")
     print(f"Time = {speculative_time:.2f}s")
