@@ -1,16 +1,10 @@
 # Speculative Sampling
-Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://jaykmody.com/blog/speculative-sampling) for this implementation.
-
-GPT-2 code adapted from [picoGPT](https://github.com/jaymody/picoGPT). For the decoding algorithm themselves, I try and match the notation used in the paper as much as possible.
-
-This implementation is for demonstrative purposes (i.e. extremely minimal, for example KV caching/batching/top-p are not implemented). As such, I wouldn't pay too much attention to the speedup times. I also haven't verified that there is no performance degradation outside of some qualitative assessment. I use GPT-2 1558M as the target model and GPT-2 124M as the draft model.
+Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://github.com/jaymody/speculative-sampling/blob/main/main.py#L38-L80) for this implementation.
 
 **Install Dependencies**:
 ```bash
 pip install -r picoGPT/requirements.txt
 ```
-If you're using an M1 Macbook, you'll need to replace tensorflow with `tensorflow-macos`.
-
 Tested on `Python 3.9.10`.
 
 **Usage**:
