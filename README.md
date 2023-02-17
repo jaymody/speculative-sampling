@@ -7,31 +7,34 @@ This implementation is for demonstrative purposes (i.e. extremely minimal, for e
 
 **Install Dependencies**:
 ```bash
-pip install -r requirements.txt
+pip install -r picoGPT/requirements.txt
 ```
 If you're using an M1 Macbook, you'll need to replace tensorflow with `tensorflow-macos`.
 
 Tested on `Python 3.9.10`.
 
 **Usage**:
-```bash
-python main.py \
+```python
+python speculative_sampling.py \
     --prompt "Alan Turing theorized that computers would one day become" \
-    --n_tokens_to_generate 40
+    --n_tokens_to_generate 40 \
+    --draft_model_size "124M" \
+    --target_model_size "1558M" \
+    --K 4
 ```
 
-This will take a while (about 5-10 minutes on an M1 MacBook). It outputs:
+Which outputs:
 ```text
 Autoregressive Decode
---------------
-Time = 164.96s
+---------------------
+Time = 71.64s
 Text = Alan Turing theorized that computers would one day become so powerful that they would be able to think like humans.
 
 In the 1950s, he proposed a way to build a computer that could think like a human. He called it the "T
 
 Speculative Decode
 ------------------
-Time = 104.55s
+Time = 30.11s
 Text = Alan Turing theorized that computers would one day become so powerful that they would be able to think for themselves. But it's not just computers that are capable of thinking for themselves.
 
 In fact, the brain is a computer, and it's capable

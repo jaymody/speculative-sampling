@@ -1,10 +1,13 @@
 import functools
+import sys
 import time
 
 import numpy as np
 from tqdm import tqdm
 
-from model import gpt2, softmax
+sys.path.append("picoGPT")
+
+from gpt2 import gpt2, softmax
 from utils import load_encoder_hparams_and_params
 
 
