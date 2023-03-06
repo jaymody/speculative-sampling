@@ -1,5 +1,5 @@
 # Speculative Sampling
-Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://github.com/jaymody/speculative-sampling/blob/main/main.py#L38-L80) for this implementation.
+Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://jaykmody.com/blog/speculative-sampling/) for this implementation.
 
 **Install Dependencies**:
 ```bash
