@@ -43,13 +43,13 @@ def speculative_sampling(x, draft_model, target_model, N, K):
 
     with tqdm(total=N, desc="speculative sampling") as pbar:
         while n < T:
-            # Step 1: auto-regressive decode K tokens from draft model
+            # Step 1: auto-regressive decode K tokens from draft model and get final p
             x_draft = x
             for _ in range(K):
-                x_draft = np.append(x_draft, sample(draft_model(x_draft)[-1]))
+                p = draft_model(x_draft)
+                x_draft = np.append(x_draft, sample(p[-1]))
 
-            # Step 2: full draft and target model forward passes on x_draft
-            p = draft_model(x_draft)
+            # Step 2: target model forward passes on x_draft
             q = target_model(x_draft)
 
             # Step 3: append draft tokens based on rejection criterion and resample
