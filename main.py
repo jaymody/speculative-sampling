@@ -54,22 +54,21 @@ def speculative_sampling(x, draft_model, target_model, N, K):
 
             # Step 3: append draft tokens based on rejection criterion and resample
             # a token on rejection
-            keep_n = 0
+            all_accepted = True
             for _ in range(K):
-                r = np.random.random()
                 i = n - 1
                 j = x_draft[i + 1]
-                if r < min(1, q[i][j] / p[i][j]):  # accepted
+                if np.random.random() < min(1, q[i][j] / p[i][j]):  # accepted
                     x = np.append(x, j)
                     n += 1
-                    keep_n += 1
                 else:  # rejected
                     x = np.append(x, sample(max_fn(q[i] - p[i])))  # resample
                     n += 1
+                    all_accepted = False
                     break
 
             # Step 4: if all draft tokens were accepted, sample a final token
-            if keep_n == K:
+            if all_accepted:
                 x = np.append(x, sample(q[-1]))
                 n += 1
 
