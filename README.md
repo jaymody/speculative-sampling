@@ -1,5 +1,5 @@
 # Speculative Sampling
-Simple and minimal implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://jaykmody.com/blog/speculative-sampling/) for this implementation.
+A simple implementation of [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/pdf/2302.01318.pdf) in NumPy for GPT-2. See [`main.py`](https://github.com/jaymody/speculative-sampling/blob/main/main.py). I also wrote a [blog post](https://jaykmody.com/blog/speculative-sampling/) for this implementation.
 
 **Install Dependencies**:
 ```bash
@@ -9,7 +9,7 @@ Tested on `Python 3.9.10`.
 
 **Usage**:
 ```python
-python speculative_sampling.py \
+python main.py \
     --prompt "Alan Turing theorized that computers would one day become" \
     --n_tokens_to_generate 40 \
     --draft_model_size "124M" \
