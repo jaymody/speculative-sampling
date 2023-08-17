@@ -14,22 +14,23 @@ python main.py \
     --n_tokens_to_generate 40 \
     --draft_model_size "124M" \
     --target_model_size "1558M" \
-    --K 4
+    --K 4 \
+    --temperature 0 # 0 for greedy sampling
 ```
 
 Which outputs:
 ```text
 Autoregressive Decode
 ---------------------
-Time = 71.64s
+Time = 60.64s
 Text = Alan Turing theorized that computers would one day become so powerful that they would be able to think like humans.
 
 In the 1950s, he proposed a way to build a computer that could think like a human. He called it the "T
 
 Speculative Decode
 ------------------
-Time = 30.11s
-Text = Alan Turing theorized that computers would one day become so powerful that they would be able to think for themselves. But it's not just computers that are capable of thinking for themselves.
+Time = 27.15s
+Text = Alan Turing theorized that computers would one day become so powerful that they would be able to think like humans.
 
-In fact, the brain is a computer, and it's capable
+In the 1950s, he proposed a way to build a computer that could think like a human. He called it the "T
 ```

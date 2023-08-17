@@ -16,10 +16,8 @@ def max_fn(x):
     return x_max / np.sum(x_max)
 
 
-def sample(probs):
-    # NOTE: using greedy sampling here for simplicity since I don't implement top-p and
-    # without top-p sampling from the distribution gives bad results
-    return np.argmax(probs)
+def sample(p):
+    return np.random.choice(np.arange(p.shape[-1]), p=p)
 
 
 def autoregressive_sampling(x, model, N):
@@ -79,14 +77,16 @@ def speculative_sampling(x, draft_model, target_model, N, K):
     return x
 
 
-def create_model_fn(params, hparams):
+def create_model_fn(params, hparams, temperature, eps=1e-10):
     f = functools.partial(gpt2, **params, n_head=hparams["n_head"])
-    g = lambda inputs: softmax(f(inputs))
-    # NOTE: if you want to implement top-p/top-k etc ..., you need to modify the
-    # probability distribution here instead of in the sample function, since in the
-    # paper they state the probabilities used in the rejection criteria should have
-    # top-p already applied (if using top-p)
-    return g
+
+    def model_fn(inputs):
+        logits = f(inputs)
+        logits = logits / (temperature + eps)  # eps to avoid division by zero
+        probs = softmax(logits)
+        return probs
+
+    return model_fn
 
 
 def main(
@@ -96,6 +96,7 @@ def main(
     target_model_size: str = "1558M",
     models_dir: str = "models",
     K: int = 4,
+    temperature: float = 0.0,
     seed: int = 123,
 ):
     # seed numpy rng
@@ -108,8 +109,8 @@ def main(
     _, target_hparams, target_params = load_encoder_hparams_and_params(
         target_model_size, models_dir
     )
-    draft_model = create_model_fn(draft_params, draft_hparams)
-    target_model = create_model_fn(target_params, target_hparams)
+    draft_model = create_model_fn(draft_params, draft_hparams, temperature)
+    target_model = create_model_fn(target_params, target_hparams, temperature)
 
     # encode inputs
     input_ids = encoder.encode(prompt)
