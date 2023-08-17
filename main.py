@@ -41,6 +41,8 @@ def speculative_sampling(x, draft_model, target_model, N, K):
 
     with tqdm(total=N, desc="speculative sampling") as pbar:
         while n < T:
+            prev_n = n
+
             # Step 1: auto-regressive decode K tokens from draft model and get final p
             x_draft = x
             for _ in range(K):
@@ -71,7 +73,7 @@ def speculative_sampling(x, draft_model, target_model, N, K):
                 n += 1
 
             # just keeping my sanity
-            pbar.update(n - pbar.n)
+            pbar.update(n - prev_n)
             assert n == len(x), f"{n} {len(x)}"
 
     return x
